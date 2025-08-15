@@ -4,7 +4,7 @@ import SwiftUI
 struct FavBlueApp: App {
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            AppView()
         }
     }
 }
