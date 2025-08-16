@@ -4,10 +4,10 @@ final class FavoriteDevicesRepository: FavoriteDevicesRepositoryType {
 
     init() {}
 
-    func fetchFavoriteDevices() async throws -> [Device] {
+    func fetchFavoriteDevices() async throws -> [BluetoothDevice] {
         return [
-            Device(id: "1", name: "Name 1", nickname: "Nickname 1"),
-            Device(id: "2", name: "Name 2", nickname: "Nickname 2")
+            BluetoothDevice(id: UUID(), name: "Name 1", rssi: -50),
+            BluetoothDevice(id: UUID(), name: "Name 2", rssi: -20),
         ]
     }
 }

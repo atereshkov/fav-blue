@@ -4,7 +4,7 @@ import Foundation
 @Observable
 final class FavoriteDevicesViewModel {
 
-    private(set) var devices: [Device] = []
+    private(set) var devices: [BluetoothDevice] = []
     private(set) var state: FavoriteDevicesState = .loading
 
     private let useCase: FavoriteDevicesUseCaseType

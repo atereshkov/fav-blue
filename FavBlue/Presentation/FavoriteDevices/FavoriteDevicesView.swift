@@ -84,7 +84,7 @@ struct FavoriteDevicesView: View {
     }
 
     private var bottomFooter: some View {
-        NavigationLink(destination: EmptyView()) {
+        NavigationLink(destination: ScanDevicesView()) {
             Text("Add New Devices")
                 .background(Color.blue)
                 .foregroundColor(.white)
@@ -100,10 +100,10 @@ struct FavoriteDevicesView: View {
 }
 
 final class MockFavoriteDevicesUseCase: FavoriteDevicesUseCaseType {
-    func fetchFavoriteDevices() async throws -> [Device] {
+    func fetchFavoriteDevices() async throws -> [BluetoothDevice] {
         return [
-            Device(id: "1", name: "Device 1", nickname: nil),
-            Device(id: "2", name: "Device 2", nickname: "Nickname 2"),
+            BluetoothDevice(id: UUID(), name: "Name 1", rssi: -50),
+            BluetoothDevice(id: UUID(), name: "Name 2", rssi: -20),
         ]
     }
 }
