@@ -1,7 +1,7 @@
 import Foundation
 
 protocol FavoriteDevicesUseCaseType {
-    func fetchFavoriteDevices() async throws -> [BluetoothDevice]
+    func favoriteDevices() -> AsyncStream<[Favorite]>
 }
 
 final class FavoriteDevicesUseCase: FavoriteDevicesUseCaseType {
@@ -14,7 +14,7 @@ final class FavoriteDevicesUseCase: FavoriteDevicesUseCaseType {
 
     // MARK: - Internal methods
 
-    func fetchFavoriteDevices() async throws -> [BluetoothDevice] {
-        return try await repository.fetchFavoriteDevices()
+    func favoriteDevices() -> AsyncStream<[Favorite]> {
+        repository.favoritesStream()
     }
 }

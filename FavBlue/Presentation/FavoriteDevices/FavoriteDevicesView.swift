@@ -18,7 +18,7 @@ struct FavoriteDevicesView: View {
                     devicesList
                     bottomFooter
                 case .error(let error):
-                    errorView(error: error)
+                    errorView(error)
                 }
             }
             .navigationTitle("Favorites")
@@ -42,7 +42,7 @@ struct FavoriteDevicesView: View {
 
     private var devicesList: some View {
         List {
-            ForEach(viewModel.devices) { item in
+            ForEach(viewModel.favoriteDevices) { item in
                 FavoriteDeviceRow(item: item)
                 .swipeActions {
                     Button() {
@@ -68,7 +68,7 @@ struct FavoriteDevicesView: View {
             .frame(maxWidth: .infinity, alignment: .center)
     }
 
-    private func errorView(error: Error?) -> some View {
+    private func errorView(_ error: Error?) -> some View {
         VStack {
             Text("An error occurred while loading devices.")
                 .foregroundColor(.red)
@@ -84,7 +84,7 @@ struct FavoriteDevicesView: View {
     }
 
     private var bottomFooter: some View {
-        NavigationLink(destination: ScanDevicesView()) {
+        NavigationLink(destination: LazyNavigationView(ScanDevicesView())) {
             Text("Add New Devices")
                 .background(Color.blue)
                 .foregroundColor(.white)
@@ -100,10 +100,13 @@ struct FavoriteDevicesView: View {
 }
 
 final class MockFavoriteDevicesUseCase: FavoriteDevicesUseCaseType {
-    func fetchFavoriteDevices() async throws -> [BluetoothDevice] {
-        return [
-            BluetoothDevice(id: UUID(), name: "Name 1", rssi: -50),
-            BluetoothDevice(id: UUID(), name: "Name 2", rssi: -20),
-        ]
+    func favoriteDevices() -> AsyncStream<[Favorite]> {
+        AsyncStream { continuation in
+            let items = [
+                Favorite(deviceId: UUID(), lastKnownName: "Known1", nickname: "Name 1"),
+                Favorite(deviceId: UUID(), lastKnownName: "Known 2", nickname: nil),
+            ]
+            continuation.yield(items)
+        }
     }
 }

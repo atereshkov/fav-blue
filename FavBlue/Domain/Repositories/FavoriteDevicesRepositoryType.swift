@@ -1,5 +1,10 @@
 import Foundation
 
 protocol FavoriteDevicesRepositoryType {
-    func fetchFavoriteDevices() async throws -> [BluetoothDevice]
+    func favoritesStream() -> AsyncStream<[Favorite]>
+
+    func addFavorite(deviceId: UUID, lastKnownName: String?, nickname: String?)
+    func removeFavorite(deviceId: UUID)
+
+    func setNickname(deviceId: UUID, nickname: String?)
 }

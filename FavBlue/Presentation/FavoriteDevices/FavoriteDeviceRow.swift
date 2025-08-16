@@ -1,17 +1,18 @@
 import SwiftUI
 
 struct FavoriteDeviceRow: View {
-    let item: BluetoothDevice
+    // TODO: use RowViewModel
+    let item: Favorite
 
     var body: some View {
         Button(action: {
 //            showingAlert = true
         }) {
-            Text(item.name ?? "")
+            Text(item.nickname ?? item.lastKnownName ?? "")
         }
     }
 }
 
 #Preview {
-    FavoriteDeviceRow(item: BluetoothDevice(id: UUID(), name: "Name 1", rssi: -50))
+    FavoriteDeviceRow(item: Favorite(deviceId: UUID(), lastKnownName: "Known", nickname: "Nickname"))
 }
