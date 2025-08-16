@@ -9,6 +9,10 @@ final class SplashViewModel {
     private(set) var name: String = "Aliaksandr Tserashkou"
     private(set) var isFinished: Bool = false
 
+    deinit {
+        print("SplashViewModel deinit")
+    }
+
     // MARK: - Private properties
 
     private var timerTask: Task<Void, Never>?

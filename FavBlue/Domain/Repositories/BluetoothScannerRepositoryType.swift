@@ -1,6 +1,6 @@
 import Foundation
 
-protocol BluetoothDevicesRepositoryType {
+protocol BluetoothScannerRepositoryType {
     func devices() -> AsyncStream<[BluetoothDevice]>
     func state() -> AsyncStream<BluetoothScanState>
 

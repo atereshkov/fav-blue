@@ -1,6 +1,6 @@
 import Foundation
 
-final class BluetoothDevicesRepository: BluetoothDevicesRepositoryType {
+final class BluetoothScannerRepository: BluetoothScannerRepositoryType {
 
     private let bluetoothScanner: BluetoothScanner
 

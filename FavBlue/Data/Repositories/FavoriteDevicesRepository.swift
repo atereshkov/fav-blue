@@ -1,20 +1,27 @@
 import Foundation
 
-final class FavoriteDevicesRepository: FavoriteDevicesRepositoryType {
+final actor FavoriteDevicesRepository: FavoriteDevicesRepositoryType {
 
     private var storage: [UUID: Favorite] = [:]
-    private var continuation: AsyncStream<[Favorite]>.Continuation?
+    private var continuations: [UUID: AsyncStream<[Favorite]>.Continuation] = [:]
 
     init() {
-        storage[UUID()] = Favorite(deviceId: UUID(), lastKnownName: "123", nickname: "Nickname")
+//        storage[UUID()] = Favorite(deviceId: UUID(), lastKnownName: "123", nickname: "Nickname")
     }
+
+    deinit {
+        for cont in continuations.values { cont.finish() }
+    }
+
+    // MARK: - Internal methods
 
     func favoritesStream() -> AsyncStream<[Favorite]> {
         AsyncStream { continuation in
-            self.continuation = continuation
+            let id = UUID()
+            self.addContinuation(id: id, continuation: continuation)
             continuation.yield(Array(storage.values))
             continuation.onTermination = { @Sendable _ in
-                self.continuation = nil
+                Task { await self.removeContinuation(id: id) }
             }
         }
     }
@@ -22,18 +29,33 @@ final class FavoriteDevicesRepository: FavoriteDevicesRepositoryType {
     func addFavorite(deviceId: UUID, lastKnownName: String?, nickname: String?) {
         let fav = Favorite(deviceId: deviceId, lastKnownName: lastKnownName, nickname: nickname)
         storage[deviceId] = fav
-        continuation?.yield(Array(storage.values))
+        broadcastCurrent()
     }
 
     func removeFavorite(deviceId: UUID) {
         storage.removeValue(forKey: deviceId)
-        continuation?.yield(Array(storage.values))
+        broadcastCurrent()
     }
 
     func setNickname(deviceId: UUID, nickname: String?) {
-        guard var existing = self.storage[deviceId] else { return }
+        guard var existing = storage[deviceId] else { return }
         existing.nickname = nickname
         storage[deviceId] = existing
-        continuation?.yield(Array(storage.values))
+        broadcastCurrent()
+    }
+
+    // MARK: - Private methods
+
+    private func addContinuation(id: UUID, continuation: AsyncStream<[Favorite]>.Continuation) {
+        continuations[id] = continuation
+    }
+
+    private func removeContinuation(id: UUID) {
+        continuations.removeValue(forKey: id)
+    }
+
+    private func broadcastCurrent() {
+        let snapshot = Array(storage.values)
+        for cont in continuations.values { cont.yield(snapshot) }
     }
 }

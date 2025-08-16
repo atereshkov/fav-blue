@@ -1,10 +1,10 @@
 import Foundation
 
 protocol FavoriteDevicesRepositoryType {
-    func favoritesStream() -> AsyncStream<[Favorite]>
+    func favoritesStream() async -> AsyncStream<[Favorite]>
 
-    func addFavorite(deviceId: UUID, lastKnownName: String?, nickname: String?)
-    func removeFavorite(deviceId: UUID)
+    func addFavorite(deviceId: UUID, lastKnownName: String?, nickname: String?) async
+    func removeFavorite(deviceId: UUID) async
 
-    func setNickname(deviceId: UUID, nickname: String?)
+    func setNickname(deviceId: UUID, nickname: String?) async
 }

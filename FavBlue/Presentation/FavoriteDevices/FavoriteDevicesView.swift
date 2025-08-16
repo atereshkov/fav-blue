@@ -1,12 +1,12 @@
 import SwiftUI
 
-struct FavoriteDevicesView: View {
-
-    @State private var showingAlert = false
-
-    @State private var name: String = ""
+struct FavoriteDevicesView<ScanDevicesView: View>: View {
 
     let viewModel: FavoriteDevicesViewModel
+    let scanDevicesViewProvider: () -> ScanDevicesView
+
+    @State private var showingAlert = false
+    @State private var name: String = ""
 
     var body: some View {
         NavigationStack {
@@ -21,22 +21,25 @@ struct FavoriteDevicesView: View {
                     errorView(error)
                 }
             }
+            .onAppear {
+                viewModel.start()
+            }
+            .onDisappear {
+                viewModel.stop()
+            }
+            .alert("Alert Title", isPresented: $showingAlert) {
+                TextField(text: $name) {}
+                Button("Submit") {
+                    print("Submit")
+                }
+                Button("Cancel") {
+                    print("Skip")
+                }
+            } message: {
+                Text("Enter device nickname (optional)")
+            }
             .navigationTitle("Favorites")
             .navigationBarTitleDisplayMode(.inline)
-        }
-        .task {
-            await viewModel.start()
-        }
-        .alert("Alert Title", isPresented: $showingAlert) {
-            TextField(text: $name) {}
-            Button("Submit") {
-                print("Submit")
-            }
-            Button("Cancel") {
-                print("Skip")
-            }
-        } message: {
-            Text("Enter channel name")
         }
     }
 
@@ -84,7 +87,7 @@ struct FavoriteDevicesView: View {
     }
 
     private var bottomFooter: some View {
-        NavigationLink(destination: LazyNavigationView(ScanDevicesView())) {
+        NavigationLink(destination: LazyNavigationView(scanDevicesViewProvider())) {
             Text("Add New Devices")
                 .background(Color.blue)
                 .foregroundColor(.white)
@@ -96,7 +99,10 @@ struct FavoriteDevicesView: View {
 }
 
 #Preview {
-    FavoriteDevicesView(viewModel: FavoriteDevicesViewModel(useCase: MockFavoriteDevicesUseCase()))
+    FavoriteDevicesView(
+        viewModel: FavoriteDevicesViewModel(useCase: MockFavoriteDevicesUseCase()),
+        scanDevicesViewProvider: { EmptyView() }
+    )
 }
 
 final class MockFavoriteDevicesUseCase: FavoriteDevicesUseCaseType {

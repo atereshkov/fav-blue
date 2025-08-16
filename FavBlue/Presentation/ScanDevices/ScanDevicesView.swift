@@ -1,7 +1,8 @@
 import SwiftUI
 
 struct ScanDevicesView: View {
-    @State private var viewModel = ScanDevicesViewModel(useCase: BluetoothDevicesUseCase(repository: BluetoothDevicesRepository(bluetoothScanner: BluetoothScanner())))
+
+    let viewModel: ScanDevicesViewModel
 
     var body: some View {
         VStack(alignment: .leading) {
@@ -43,7 +44,9 @@ struct ScanDevicesView: View {
         List {
             Section("Discovered Devices") {
                 ForEach(viewModel.devices) { item in
-                    DiscoveredDeviceRow(item: item)
+                    DiscoveredDeviceRow(item: item) { item in
+                        viewModel.handleDeviceTap(device: item)
+                    }
                 }
             }
         }
@@ -74,5 +77,13 @@ struct ScanDevicesView: View {
 }
 
 #Preview {
-    ScanDevicesView()
+//    ScanDevicesView(
+//        viewModel: ScanDevicesViewModel(
+//            useCase: BluetoothScannerUseCase(
+//                repository: BluetoothScannerRepository(bluetoothScanner: BluetoothScanner()),
+//                favoritesRepository: FavoriteDevicesRepository()
+//            ),
+//            favoritesUseCase: FavoritesManagementUseCase(repository: FavoriteDevicesRepository())
+//        )
+//    )
 }
