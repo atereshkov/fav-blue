@@ -9,7 +9,8 @@ final class ScanDevicesViewModel {
 
     private(set) var devices: [BluetoothDevice] = []
     private(set) var state: ScanDevicesState = .scanning
-    private(set) var activeDialog: FavoriteDialog?
+    private(set) var activeDialog: ScanDeviceDialog?
+    private(set) var activeSheet: ScanDeviceSheet?
 
     private var devicesTask: Task<Void, Never>?
     private var stateTask: Task<Void, Never>?
@@ -59,7 +60,7 @@ final class ScanDevicesViewModel {
         if device.isFavorite {
             activeDialog = .remove(device: device)
         } else {
-            activeDialog = .add(device: device)
+            activeSheet = .addToFavorites(device: device)
         }
     }
 
@@ -84,6 +85,12 @@ final class ScanDevicesViewModel {
     func dismissDialog() {
         activeDialog = nil
     }
+
+    func dismissSheet() {
+        activeSheet = nil
+    }
+
+    // MARK: - Private methods
 
     private func map(scannerState: BluetoothScanState) -> ScanDevicesState {
         switch scannerState {

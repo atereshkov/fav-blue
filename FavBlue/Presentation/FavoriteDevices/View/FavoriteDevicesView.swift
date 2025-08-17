@@ -5,9 +5,6 @@ struct FavoriteDevicesView<ScanDevicesView: View>: View {
     let viewModel: FavoriteDevicesViewModel
     let scanDevicesViewProvider: () -> ScanDevicesView
 
-    @State private var showingAlert = false
-    @State private var name: String = ""
-
     var body: some View {
         NavigationStack {
             VStack(spacing: 0) {
@@ -29,19 +26,50 @@ struct FavoriteDevicesView<ScanDevicesView: View>: View {
             .onDisappear {
                 viewModel.stop()
             }
-            .alert("Alert Title", isPresented: $showingAlert) {
-                TextField(text: $name) {}
-                Button("Submit") {
-                    print("Submit")
-                }
-                Button("Cancel") {
-                    print("Skip")
-                }
+            .sheet(isPresented: isShowingSheetBinding) {
+                sheetView()
+            }
+            .alert(viewModel.activeDialog?.alertTitle ?? "", isPresented: isShowingDialogBinding) {
+                alertView()
             } message: {
-                Text("Enter device nickname (optional)")
+                Text(viewModel.activeDialog?.message ?? "")
             }
             .navigationTitle("Favorites")
             .navigationBarTitleDisplayMode(.inline)
+        }
+    }
+
+    @ViewBuilder
+    private func sheetView() -> some View {
+        switch viewModel.activeSheet {
+        case .changeNickname(let favorite):
+            DeviceNicknameSheet(
+                favorite: favorite,
+                onSave: { favorite, nickname in
+                    viewModel.changeNickname(device: favorite, nickname: nickname)
+                    viewModel.dismissSheet()
+                },
+                onCancel: {
+                    viewModel.dismissSheet()
+                }
+            )
+        case .none:
+            EmptyView()
+        }
+    }
+
+    @ViewBuilder
+    private func alertView() -> some View {
+        switch viewModel.activeDialog {
+        case .remove(let device):
+            Button("Remove", role: .destructive) {
+                viewModel.deleteFavoriteConfirmed(device)
+            }
+            Button("Cancel", role: .cancel) {
+                viewModel.dismissDialog()
+            }
+        case .none:
+            EmptyView()
         }
     }
 
@@ -53,7 +81,7 @@ struct FavoriteDevicesView<ScanDevicesView: View>: View {
                 }
                 .swipeActions {
                     Button() {
-                        viewModel.handleDeviceDelete(item)
+                        viewModel.deleteFavoriteRequested(item)
                     } label: {
                         Label("Delete", systemImage: "trash.fill")
                     }
@@ -111,36 +139,29 @@ struct FavoriteDevicesView<ScanDevicesView: View>: View {
                 .ignoresSafeArea(edges: .bottom)
         )
     }
+
+    private var isShowingDialogBinding: Binding<Bool> {
+        Binding<Bool>(
+            get: { viewModel.activeDialog != nil },
+            set: { show in
+                if !show { viewModel.dismissDialog() }
+            }
+        )
+    }
+
+    private var isShowingSheetBinding: Binding<Bool> {
+        Binding<Bool>(
+            get: { viewModel.activeSheet != nil },
+            set: { show in
+                if !show { viewModel.dismissSheet() }
+            }
+        )
+    }
 }
 
 #Preview {
     FavoriteDevicesView(
-        viewModel: FavoriteDevicesViewModel(useCase: MockFavoriteDevicesUseCase()),
+        viewModel: FavoriteDevicesViewModel(useCase: .previewMock()),
         scanDevicesViewProvider: { EmptyView() }
     )
-}
-
-final class MockFavoriteDevicesUseCase: FavoriteDevicesUseCaseType {
-
-    func favoriteDevices() -> AsyncThrowingStream<[Favorite], Error> {
-        AsyncThrowingStream { continuation in
-            let items = [
-                Favorite(deviceId: UUID(), lastKnownName: "Known1", nickname: "Name 1"),
-                Favorite(deviceId: UUID(), lastKnownName: "Known 2", nickname: nil),
-            ]
-            continuation.yield(items)
-        }
-    }
-
-    func addFavorite(deviceId: UUID, lastKnownName: String?, nickname: String?) async {
-
-    }
-
-    func removeFavorite(deviceId: UUID) async {
-
-    }
-
-    func setNickname(deviceId: UUID, nickname: String?) async {
-
-    }
 }

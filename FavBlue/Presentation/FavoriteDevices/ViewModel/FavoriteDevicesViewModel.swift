@@ -8,6 +8,8 @@ final class FavoriteDevicesViewModel {
 
     private(set) var favoriteDevices: [Favorite] = []
     private(set) var state: FavoriteDevicesState = .loading
+    private(set) var activeDialog: FavoriteDevicesDialog?
+    private(set) var activeSheet: FavoriteDevicesSheet?
 
     private var favoritesTask: Task<Void, Never>?
 
@@ -47,12 +49,38 @@ final class FavoriteDevicesViewModel {
     }
 
     func handleDeviceTap(_ device: Favorite) {
-        // Edit nickname
+        activeSheet = .changeNickname(device: device)
     }
 
-    func handleDeviceDelete(_ device: Favorite) {
+    func deleteFavoriteRequested(_ device: Favorite) {
+        activeDialog = .remove(device: device)
+    }
+
+    func deleteFavoriteConfirmed(_ device: Favorite) {
         Task {
             await useCase.removeFavorite(deviceId: device.deviceId)
         }
+    }
+
+    func changeNickname(device: Favorite, nickname: String?) {
+        Task {
+            await useCase.setNickname(deviceId: device.deviceId, nickname: nickname)
+        }
+    }
+
+    func removeFavorite(device: Favorite) {
+        Task {
+            await useCase.removeFavorite(deviceId: device.deviceId)
+        }
+    }
+
+    // MARK: - Private methods
+
+    func dismissDialog() {
+        activeDialog = nil
+    }
+
+    func dismissSheet() {
+        activeSheet = nil
     }
 }

@@ -1,7 +1,6 @@
 import SwiftUI
 
 struct DiscoveredDeviceRow: View {
-    // TODO: use RowViewModel
     let item: BluetoothDevice
     let onTap: (BluetoothDevice) -> Void
 

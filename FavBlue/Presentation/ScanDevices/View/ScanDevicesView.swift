@@ -4,8 +4,6 @@ struct ScanDevicesView: View {
 
     let viewModel: ScanDevicesViewModel
 
-    @State private var nickname: String = ""
-
     var body: some View {
         VStack(alignment: .leading) {
             switch viewModel.state {
@@ -32,46 +30,48 @@ struct ScanDevicesView: View {
         .onDisappear {
             viewModel.stop()
         }
-        .alert(alertTitle(), isPresented: isShowingDialogBinding) {
-            switch viewModel.activeDialog {
-            case .add(let device):
-                // TODO: TextField issue - replace with a screen? (TextField + Save in toolbar)
-                TextField("Nickname", text: $nickname)
-                Button("Add") {
-                    viewModel.addFavorite(device, nickname: nickname)
-                }
-                Button("Cancel", role: .cancel) {
-                    viewModel.dismissDialog()
-                }
-            case .remove(let device):
-                Button("Remove", role: .destructive) {
-                    viewModel.removeFavorite(device: device)
-                }
-                Button("Cancel", role: .cancel) {
-                    viewModel.dismissDialog()
-                }
-            case .none:
-                EmptyView()
-            }
+        .sheet(isPresented: isShowingSheetBinding) {
+            sheetView()
+        }
+        .alert(viewModel.activeDialog?.alertTitle ?? "", isPresented: isShowingDialogBinding) {
+            alertView()
         } message: {
-            switch viewModel.activeDialog {
-            case .add(_):
-                Text("Enter device nickname (optional)")
-            case .remove(let device):
-                // TODO nickname first
-                Text("Remove \(device.name ?? "") from favorites?")
-            case .none:
-                EmptyView()
-            }
+            Text(viewModel.activeDialog?.message ?? "")
         }
     }
 
-    private var scanStatus: some View {
-        HStack {
-            Text("Scanning...")
-            ProgressView()
+    @ViewBuilder
+    private func sheetView() -> some View {
+        switch viewModel.activeSheet {
+        case .addToFavorites(let device):
+            AddToFavoritesSheet(
+                device: device,
+                onSave: { device, nickname in
+                    viewModel.addFavorite(device, nickname: nickname)
+                    viewModel.dismissSheet()
+                },
+                onCancel: {
+                    viewModel.dismissSheet()
+                }
+            )
+        case .none:
+            EmptyView()
         }
-        .padding([.leading, .trailing], 24)
+    }
+
+    @ViewBuilder
+    private func alertView() -> some View {
+        switch viewModel.activeDialog {
+        case .remove(let device):
+            Button("Remove", role: .destructive) {
+                viewModel.removeFavorite(device: device)
+            }
+            Button("Cancel", role: .cancel) {
+                viewModel.dismissDialog()
+            }
+        case .none:
+            EmptyView()
+        }
     }
 
     private var discoveredDevicesList: some View {
@@ -121,23 +121,21 @@ struct ScanDevicesView: View {
         )
     }
 
-    private func alertTitle() -> String {
-        switch viewModel.activeDialog {
-        case .add: return "Add to favorites"
-        case .remove: return "Remove from favorites?"
-        case .none: return ""
-        }
+    private var isShowingSheetBinding: Binding<Bool> {
+        Binding<Bool>(
+            get: { viewModel.activeSheet != nil },
+            set: { show in
+                if !show { viewModel.dismissSheet() }
+            }
+        )
     }
 }
 
 #Preview {
-//    ScanDevicesView(
-//        viewModel: ScanDevicesViewModel(
-//            useCase: BluetoothScannerUseCase(
-//                repository: BluetoothScannerRepository(bluetoothScanner: BluetoothScanner()),
-//                favoritesRepository: FavoriteDevicesRepository()
-//            ),
-//            favoritesUseCase: FavoritesManagementUseCase(repository: FavoriteDevicesRepository())
-//        )
-//    )
+    ScanDevicesView(
+        viewModel: ScanDevicesViewModel(
+            useCase: .previewMock(),
+            favoritesUseCase: .previewMock()
+        )
+    )
 }

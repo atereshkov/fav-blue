@@ -1,7 +1,6 @@
 import SwiftUI
 
 struct FavoriteDeviceRow: View {
-    // TODO: use RowViewModel
     let item: Favorite
     let onTap: (Favorite) -> Void
 

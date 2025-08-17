@@ -1,13 +1,10 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
-    "Add" : {
-
-    },
     "Add New Devices" : {
       "extractionState" : "manual"
     },
-    "Alert Title" : {
+    "Add to favorites" : {
 
     },
     "An error occurred while loading devices." : {
@@ -22,7 +19,10 @@
     "Discovered Devices" : {
 
     },
-    "Enter device nickname (optional)" : {
+    "Edit nickname" : {
+
+    },
+    "Editing nickname for this favorite." : {
 
     },
     "Favorites" : {
@@ -31,25 +31,22 @@
     "Nickname" : {
 
     },
+    "Nickname (optional)" : {
+
+    },
     "No favorite devices yet" : {
 
     },
     "Remove" : {
 
     },
-    "Remove %@ from favorites?" : {
-
-    },
     "Retry" : {
 
     },
+    "Save" : {
+
+    },
     "Scan Devices" : {
-
-    },
-    "Scanning..." : {
-
-    },
-    "Submit" : {
 
     },
     "Why don't you add your first one?" : {
