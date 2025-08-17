@@ -67,7 +67,7 @@ struct FavoriteDevicesView<ScanDevicesView: View>: View {
         ContentUnavailableView {
             Label("No favorite devices yet", systemImage: "star")
         } description: {
-            Text("Why don't you add some?")
+            Text("Why don't you add your first one?")
         } actions: {
             NavigationLink(destination: LazyNavigationView(scanDevicesViewProvider())) {
                 Text("Add New Devices")
@@ -122,8 +122,8 @@ struct FavoriteDevicesView<ScanDevicesView: View>: View {
 
 final class MockFavoriteDevicesUseCase: FavoriteDevicesUseCaseType {
 
-    func favoriteDevices() -> AsyncStream<[Favorite]> {
-        AsyncStream { continuation in
+    func favoriteDevices() -> AsyncThrowingStream<[Favorite], Error> {
+        AsyncThrowingStream { continuation in
             let items = [
                 Favorite(deviceId: UUID(), lastKnownName: "Known1", nickname: "Name 1"),
                 Favorite(deviceId: UUID(), lastKnownName: "Known 2", nickname: nil),
@@ -141,6 +141,6 @@ final class MockFavoriteDevicesUseCase: FavoriteDevicesUseCaseType {
     }
 
     func setNickname(deviceId: UUID, nickname: String?) async {
-        
+
     }
 }

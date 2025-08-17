@@ -2,7 +2,7 @@ import Foundation
 
 final class BluetoothScannerRepository: BluetoothScannerRepositoryType {
 
-    private let bluetoothScanner: BluetoothScanner
+    private let bluetoothScanner: BluetoothScannerType
 
     private var devicesContinuation: AsyncStream<[BluetoothDevice]>.Continuation?
     private var stateContinuation: AsyncStream<BluetoothScanState>.Continuation?
@@ -12,7 +12,7 @@ final class BluetoothScannerRepository: BluetoothScannerRepositoryType {
 
     // MARK: Lifecycle
 
-    init(bluetoothScanner: BluetoothScanner) {
+    init(bluetoothScanner: BluetoothScannerType) {
         self.bluetoothScanner = bluetoothScanner
 
         setupConsumer()
@@ -29,8 +29,7 @@ final class BluetoothScannerRepository: BluetoothScannerRepositoryType {
     func devicesStream() -> AsyncStream<[BluetoothDevice]> {
         AsyncStream { continuation in
             self.devicesContinuation = continuation
-            // TODO: Move out sorting to usecase lvl?
-            continuation.yield(Array(self.devicesById.values).sorted(by: { $0.id > $1.id }))
+            continuation.yield(Array(self.devicesById.values))
             continuation.onTermination = { _ in
                 self.devicesContinuation = nil
             }
@@ -61,24 +60,21 @@ final class BluetoothScannerRepository: BluetoothScannerRepositoryType {
 
     private func setupConsumer() {
         consumerTask = Task { [weak self] in
-            guard let self = self else { return }
+            guard let self else { return }
             for await event in self.bluetoothScanner.eventStream() {
                 switch event {
                 case .stateChanged(let state):
-                    self.stateContinuation?.yield(state)
-                case .discovered(let peripheral, let rssi):
-                    let id = peripheral.identifier
+                    self.stateContinuation?.yield(state.toDomain())
+                case .discovered(let id, let name, let rssi):
                     if var existing = self.devicesById[id] {
-                        existing.update(name: peripheral.name, rssi: rssi)
+                        existing.update(name: name, rssi: rssi)
                         self.devicesById[id] = existing
                     } else {
-                        let newDevice = BluetoothDevice(id: id, name: peripheral.name, rssi: rssi)
+                        let newDevice = BluetoothDevice(id: id, name: name, rssi: rssi)
                         self.devicesById[id] = newDevice
                     }
-                    // TODO: Remove sorting?
-                    let sorted = Array(self.devicesById.values)
-                        .sorted { $0.id > $1.id }
-                    self.devicesContinuation?.yield(sorted)
+                    let devices = Array(self.devicesById.values)
+                    self.devicesContinuation?.yield(devices)
                 }
             }
         }

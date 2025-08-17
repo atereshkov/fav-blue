@@ -8,14 +8,14 @@ struct BluetoothDevice: Identifiable, Hashable {
     var nickname: String?
     var isFavorite: Bool = false
 
-    init(id: UUID, name: String?, rssi: NSNumber) {
+    init(id: UUID, name: String?, rssi: Int) {
         self.id = id
         self.name = name
-        self.rssi = rssi.intValue
+        self.rssi = rssi
     }
 
-    mutating func update(name: String?, rssi: NSNumber) {
+    mutating func update(name: String?, rssi: Int) {
         self.name = name
-        self.rssi = rssi.intValue
+        self.rssi = rssi
     }
 }

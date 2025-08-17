@@ -1,21 +1,27 @@
 import Foundation
 
 enum ScanDevicesState: Equatable {
-    case idle
+    case idle(message: String?)
     case scanning
-    case error(Error?)
+    case error(ScanDevicesStateError)
+}
 
-    static func == (lhs: ScanDevicesState, rhs: ScanDevicesState) -> Bool {
-        switch (lhs, rhs) {
-        case (.idle, .idle):
-          return true
-        case (.scanning, .scanning):
-          return true
-        case (.error(let lhsError), .error(let rhsError)):
-            // TODO: fix
-            return true
-        default:
-          return false
+enum ScanDevicesStateError: Error {
+    case unsupported
+    case unauthorized
+    case resetting
+    case unknown
+
+    var message: String {
+        switch self {
+        case .unsupported:
+            "The Bluetooth is not supported on this platform."
+        case .unauthorized:
+            "The app is not authorized to use Bluetooth. Please check permissions and try again."
+        case .resetting:
+            "Connection lost. Please try again."
+        case .unknown:
+            "Unknown error. Please try again."
         }
     }
 }

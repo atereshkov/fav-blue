@@ -1,7 +1,7 @@
 import Foundation
 
 protocol BluetoothScannerUseCaseType {
-    func devicesStream() -> AsyncStream<[BluetoothDevice]>
+    func devicesStream(sortedBy option: DeviceSortOption) -> AsyncStream<[BluetoothDevice]>
     func stateStream() -> AsyncStream<BluetoothScanState>
 
     func startScanning()
@@ -23,7 +23,7 @@ final class BluetoothScannerUseCase: BluetoothScannerUseCaseType {
 
     // MARK: - Internal methods
 
-    func devicesStream() -> AsyncStream<[BluetoothDevice]> {
+    func devicesStream(sortedBy option: DeviceSortOption) -> AsyncStream<[BluetoothDevice]> {
         AsyncStream { continuation in
             var latestDevicesById: [UUID: BluetoothDevice] = [:]
             var latestFavoritesById: [UUID: Favorite] = [:]
@@ -40,7 +40,14 @@ final class BluetoothScannerUseCase: BluetoothScannerUseCaseType {
                     }
                     return result
                 }
-                combined.sort { $0.id > $1.id }
+                switch option {
+                case .byNameThenRssi:
+                    combined.sort(by: sortByNameRssiId)
+                case .byRssiOnly:
+                    combined.sort { $0.rssi > $1.rssi }
+                case .custom(let comparator):
+                    combined.sort(by: comparator)
+                }
                 continuation.yield(combined)
             }
 
@@ -49,12 +56,19 @@ final class BluetoothScannerUseCase: BluetoothScannerUseCaseType {
                     latestDevicesById = Dictionary(uniqueKeysWithValues: devices.map { ($0.id, $0) })
                     emitCombined()
                 }
+                continuation.finish()
             }
 
             let favsTask = Task {
-                for await favs in await favoritesRepository.favoritesStream() {
-                    latestFavoritesById = Dictionary(uniqueKeysWithValues: favs.map { ($0.deviceId, $0) })
-                    emitCombined()
+                do {
+                    for try await favs in await favoritesRepository.favoritesStream() {
+                        latestFavoritesById = Dictionary(uniqueKeysWithValues: favs.map { ($0.deviceId, $0) })
+                        emitCombined()
+                    }
+                    continuation.finish()
+                } catch {
+                    if error is CancellationError { return }
+                    // TODO Ideally, log / throw error
                 }
             }
 
@@ -63,7 +77,6 @@ final class BluetoothScannerUseCase: BluetoothScannerUseCaseType {
                 favsTask.cancel()
             }
         }
-
     }
 
     func stateStream() -> AsyncStream<BluetoothScanState> {
@@ -76,5 +89,30 @@ final class BluetoothScannerUseCase: BluetoothScannerUseCaseType {
 
     func stopScanning() {
         repository.stopScanning()
+    }
+
+    // MARK: - Private
+
+    private let sortByNameRssiId: (BluetoothDevice, BluetoothDevice) -> Bool = { lhs, rhs in
+        switch (lhs.name, rhs.name) {
+        case let (l?, r?): // both have names
+            if l != r {
+                return l < r
+            } else if lhs.rssi != rhs.rssi {
+                return lhs.rssi > rhs.rssi
+            } else {
+                return lhs.id < rhs.id
+            }
+        case (nil, nil): // both don't have names
+            if lhs.rssi != rhs.rssi {
+                return lhs.rssi > rhs.rssi
+            } else {
+                return lhs.id < rhs.id
+            }
+        case (nil, _?): // left has no name, right has one -> right first
+            return false
+        case (_?, nil):
+            return true // left has a name, right has none -> left first
+        }
     }
 }

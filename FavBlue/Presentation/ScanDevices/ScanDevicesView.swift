@@ -9,8 +9,8 @@ struct ScanDevicesView: View {
     var body: some View {
         VStack(alignment: .leading) {
             switch viewModel.state {
-            case .idle:
-                idleView
+            case .idle(let message):
+                idleView(message)
             case .scanning:
                 discoveredDevicesList
             case .error(let error):
@@ -35,6 +35,7 @@ struct ScanDevicesView: View {
         .alert(alertTitle(), isPresented: isShowingDialogBinding) {
             switch viewModel.activeDialog {
             case .add(let device):
+                // TODO: TextField issue - replace with a screen? (TextField + Save in toolbar)
                 TextField("Nickname", text: $nickname)
                 Button("Add") {
                     viewModel.addFavorite(device, nickname: nickname)
@@ -85,9 +86,12 @@ struct ScanDevicesView: View {
         }
     }
 
-    private func errorView(_ error: Error?) -> some View {
+    private func errorView(_ error: ScanDevicesStateError) -> some View {
         VStack {
-            Text("An error occurred: \(error).")
+            Image(systemName: "exclamationmark.circle.fill")
+                .imageScale(.large)
+            Text(error.message)
+                .multilineTextAlignment(.center)
                 .foregroundColor(.red)
                 .padding()
             Button("Retry") {
@@ -95,14 +99,14 @@ struct ScanDevicesView: View {
                     viewModel.start()
                 }
             }
-            .padding()
+            .buttonStyle(.borderedProminent)
         }
         .frame(maxWidth: .infinity, alignment: .center)
     }
 
-    private var idleView: some View {
+    private func idleView(_ message: String?) -> some View {
         VStack {
-            Text("Warming up...")
+            Text(message ?? "Unknown status")
                 .padding()
         }
         .frame(maxWidth: .infinity, alignment: .center)

@@ -1,15 +1,19 @@
 import Foundation
 import CoreBluetooth
 
-final class BluetoothScanner: NSObject {
+protocol BluetoothScannerType {
+    func eventStream() -> AsyncStream<BluetoothScannerEvent>
 
-    enum Event {
-        case discovered(peripheral: CBPeripheral, rssi: NSNumber) // TODO: Model for discovered device
-        case stateChanged(BluetoothScanState) // TODO: Should ideally not use any models from Domain
-    }
+    func startScanning()
+    func stopScanning()
+}
+
+final class BluetoothScanner: NSObject, BluetoothScannerType {
 
     private var centralManager: CBCentralManager!
-    private var continuation: AsyncStream<Event>.Continuation?
+    private var continuation: AsyncStream<BluetoothScannerEvent>.Continuation?
+
+    // MARK: - Lifecycle
 
     override init() {
         super.init()
@@ -22,11 +26,11 @@ final class BluetoothScanner: NSObject {
 
     // MARK: - Internal methods
 
-    func eventStream() -> AsyncStream<Event> {
+    func eventStream() -> AsyncStream<BluetoothScannerEvent> {
         AsyncStream { continuation in
             self.continuation = continuation
 
-            continuation.yield(.stateChanged(map(cbState: self.centralManager.state)))
+            continuation.yield(.stateChanged(.from(self.centralManager.state)))
 
             continuation.onTermination = { _ in
                 self.stopScanning()
@@ -39,32 +43,17 @@ final class BluetoothScanner: NSObject {
         if centralManager.state == .poweredOn {
             centralManager.scanForPeripherals(
                 withServices: nil,
-                options: [CBCentralManagerScanOptionAllowDuplicatesKey: true]
+                options: nil
             )
             continuation?.yield(.stateChanged(.scanning))
         } else {
-            continuation?.yield(.stateChanged(map(cbState: centralManager.state)))
+            continuation?.yield(.stateChanged(.from(centralManager.state)))
         }
     }
 
     func stopScanning() {
         centralManager.stopScan()
-        continuation?.yield(.stateChanged(map(cbState: centralManager.state)))
-    }
-
-    // MARK: - Private methods
-
-    private func map(cbState: CBManagerState) -> BluetoothScanState {
-        switch cbState {
-        case .unknown: return .unknown
-        case .resetting: return .resetting
-        case .unsupported: return .unsupported
-        case .unauthorized: return .unauthorized
-        case .poweredOff: return .poweredOff
-        case .poweredOn: return .poweredOn
-        @unknown default:
-            return .unknown
-        }
+        continuation?.yield(.stateChanged(.from(centralManager.state)))
     }
 }
 
@@ -72,17 +61,29 @@ final class BluetoothScanner: NSObject {
 
 extension BluetoothScanner: CBCentralManagerDelegate {
     func centralManagerDidUpdateState(_ central: CBCentralManager) {
-        continuation?.yield(.stateChanged(map(cbState: central.state)))
+        continuation?.yield(.stateChanged(.from(central.state)))
 
         switch central.state {
+        case .unknown:
+            stopScanning()
+        case .resetting:
+            stopScanning()
+        case .unsupported:
+            stopScanning()
+        case .unauthorized:
+            stopScanning()
+        case .poweredOff:
+            stopScanning()
         case .poweredOn:
             startScanning()
-        default:
+        @unknown default:
             stopScanning()
         }
     }
 
     func centralManager(_ central: CBCentralManager, didDiscover peripheral: CBPeripheral, advertisementData: [String : Any], rssi RSSI: NSNumber) {
-        continuation?.yield(.discovered(peripheral: peripheral, rssi: RSSI))
+        let id = peripheral.identifier
+        let name = peripheral.name
+        continuation?.yield(.discovered(id: id, name: name, rssi: RSSI.intValue))
     }
 }

@@ -27,15 +27,19 @@ final class FavoriteDevicesViewModel {
         state = .loading
 
         favoritesTask = Task { [weak self] in
-            guard let self = self else { return }
-            for await list in await useCase.favoriteDevices() {
-                self.favoriteDevices = list
-//                    .map { FavoriteDeviceViewItem(name: $0.name ?? "") }
-                self.state = list.isEmpty ? .empty : .loaded
+            guard let self else { return }
+            do {
+                let stream = await useCase.favoriteDevices()
+                for try await list in stream {
+                    self.favoriteDevices = list
+//                        .map { FavoriteDeviceViewItem(name: $0.name ?? "") }
+                    self.state = list.isEmpty ? .empty : .loaded
+                }
+            } catch {
+                if error is CancellationError { return }
+                self.state = .error(error)
             }
         }
-
-        // TODO: state = .error(error)
     }
 
     func stop() {

@@ -1,7 +1,7 @@
 import Foundation
 
 protocol FavoriteDevicesUseCaseType {
-    func favoriteDevices() async -> AsyncStream<[Favorite]>
+    func favoriteDevices() async -> AsyncThrowingStream<[Favorite], Error>
 
     func addFavorite(deviceId: UUID, lastKnownName: String?, nickname: String?) async
     func removeFavorite(deviceId: UUID) async
@@ -18,7 +18,7 @@ final class FavoriteDevicesUseCase: FavoriteDevicesUseCaseType {
 
     // MARK: - Internal methods
 
-    func favoriteDevices() async -> AsyncStream<[Favorite]> {
+    func favoriteDevices() async -> AsyncThrowingStream<[Favorite], Error> {
         await repository.favoritesStream()
     }
 

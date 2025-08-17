@@ -3,7 +3,7 @@ import Foundation
 final actor FavoriteDevicesRepository: FavoriteDevicesRepositoryType {
 
     private var storage: [UUID: Favorite] = [:]
-    private var continuations: [UUID: AsyncStream<[Favorite]>.Continuation] = [:]
+    private var continuations: [UUID: AsyncThrowingStream<[Favorite], Error>.Continuation] = [:]
 
     // MARK: - Lifecycle
 
@@ -17,8 +17,8 @@ final actor FavoriteDevicesRepository: FavoriteDevicesRepositoryType {
 
     // MARK: - Internal methods
 
-    func favoritesStream() -> AsyncStream<[Favorite]> {
-        AsyncStream { continuation in
+    func favoritesStream() -> AsyncThrowingStream<[Favorite], Error> {
+        AsyncThrowingStream { continuation in
             let id = UUID()
             self.addContinuation(id: id, continuation: continuation)
             continuation.yield(Array(storage.values))
@@ -48,7 +48,10 @@ final actor FavoriteDevicesRepository: FavoriteDevicesRepositoryType {
 
     // MARK: - Private methods
 
-    private func addContinuation(id: UUID, continuation: AsyncStream<[Favorite]>.Continuation) {
+    private func addContinuation(
+        id: UUID,
+        continuation: AsyncThrowingStream<[Favorite], Error>.Continuation
+    ) {
         continuations[id] = continuation
     }
 

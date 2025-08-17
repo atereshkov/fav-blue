@@ -34,15 +34,15 @@ final class ScanDevicesViewModel {
         useCase.startScanning()
 
         devicesTask = Task { [weak self] in
-            guard let self = self else { return }
-            for await list in useCase.devicesStream() {
+            guard let self else { return }
+            for await list in useCase.devicesStream(sortedBy: .byNameThenRssi) {
                 self.devices = list
 //                    .map { FavoriteDeviceViewItem(name: $0.name ?? "") }
             }
         }
 
         stateTask = Task { [weak self] in
-            guard let self = self else { return }
+            guard let self else { return }
             for await state in useCase.stateStream() {
                 self.state = map(scannerState: state)
             }
@@ -66,12 +66,11 @@ final class ScanDevicesViewModel {
     // MARK: - Private methods
 
     func addFavorite(_ device: BluetoothDevice, nickname: String?) {
-        let lastKnownName = device.name
         Task {
             await favoritesUseCase.addFavorite(
                 deviceId: device.id,
-                lastKnownName: lastKnownName,
-                nickname: nickname ?? lastKnownName
+                lastKnownName: device.name,
+                nickname: nickname ?? device.name
             )
         }
     }
@@ -88,15 +87,15 @@ final class ScanDevicesViewModel {
 
     private func map(scannerState: BluetoothScanState) -> ScanDevicesState {
         switch scannerState {
-        case .idle: return .idle
-        case .poweredOn: return .idle
+        case .idle: return .idle(message: "Warming up..")
+        case .poweredOn: return .idle(message: nil)
         case .scanning: return .scanning
-        case .poweredOff: return .idle
-        case .unsupported: return .error(nil) // TODO: Pass errors or localized strings
-        case .unauthorized: return .error(nil)
-        case .resetting: return .error(nil)
-        case .unknown: return .error(nil)
-        case .error: return .error(nil)
+        case .poweredOff: return .idle(message: "Make sure to turn on Bluetooth in device settings.")
+        case .unsupported: return .error(.unsupported)
+        case .unauthorized: return .error(.unauthorized)
+        case .resetting: return .error(.resetting)
+        case .unknown: return .error(.unknown)
+        case .error: return .error(.unknown)
         }
     }
 }
