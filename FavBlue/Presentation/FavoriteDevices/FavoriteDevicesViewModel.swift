@@ -31,7 +31,7 @@ final class FavoriteDevicesViewModel {
             for await list in await useCase.favoriteDevices() {
                 self.favoriteDevices = list
 //                    .map { FavoriteDeviceViewItem(name: $0.name ?? "") }
-                self.state = .loaded
+                self.state = list.isEmpty ? .empty : .loaded
             }
         }
 
@@ -40,5 +40,15 @@ final class FavoriteDevicesViewModel {
 
     func stop() {
         favoritesTask?.cancel()
+    }
+
+    func handleDeviceTap(_ device: Favorite) {
+        // Edit nickname
+    }
+
+    func handleDeviceDelete(_ device: Favorite) {
+        Task {
+            await useCase.removeFavorite(deviceId: device.deviceId)
+        }
     }
 }

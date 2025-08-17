@@ -1,8 +1,8 @@
 import Foundation
 
 protocol BluetoothScannerUseCaseType {
-    func devices() -> AsyncStream<[BluetoothDevice]>
-    func state() -> AsyncStream<BluetoothScanState>
+    func devicesStream() -> AsyncStream<[BluetoothDevice]>
+    func stateStream() -> AsyncStream<BluetoothScanState>
 
     func startScanning()
     func stopScanning()
@@ -23,10 +23,7 @@ final class BluetoothScannerUseCase: BluetoothScannerUseCaseType {
 
     // MARK: - Internal methods
 
-    func devices() -> AsyncStream<[BluetoothDevice]> {
-//        return repository.devices()
-
-        // TODO: Figure out some weird UI updates
+    func devicesStream() -> AsyncStream<[BluetoothDevice]> {
         AsyncStream { continuation in
             var latestDevicesById: [UUID: BluetoothDevice] = [:]
             var latestFavoritesById: [UUID: Favorite] = [:]
@@ -43,12 +40,12 @@ final class BluetoothScannerUseCase: BluetoothScannerUseCaseType {
                     }
                     return result
                 }
-                combined.sort { ($0.name ?? "") > ($1.name ?? "") }
+                combined.sort { $0.id > $1.id }
                 continuation.yield(combined)
             }
 
             let devicesTask = Task {
-                for await devices in repository.devices() {
+                for await devices in repository.devicesStream() {
                     latestDevicesById = Dictionary(uniqueKeysWithValues: devices.map { ($0.id, $0) })
                     emitCombined()
                 }
@@ -69,8 +66,8 @@ final class BluetoothScannerUseCase: BluetoothScannerUseCaseType {
 
     }
 
-    func state() -> AsyncStream<BluetoothScanState> {
-        repository.state()
+    func stateStream() -> AsyncStream<BluetoothScanState> {
+        repository.stateStream()
     }
 
     func startScanning() {

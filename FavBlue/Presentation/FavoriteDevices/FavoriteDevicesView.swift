@@ -10,10 +10,12 @@ struct FavoriteDevicesView<ScanDevicesView: View>: View {
 
     var body: some View {
         NavigationStack {
-            VStack {
+            VStack(spacing: 0) {
                 switch viewModel.state {
                 case .loading:
                     loadingIndicator
+                case .empty:
+                    emptyState
                 case .loaded:
                     devicesList
                     bottomFooter
@@ -46,10 +48,12 @@ struct FavoriteDevicesView<ScanDevicesView: View>: View {
     private var devicesList: some View {
         List {
             ForEach(viewModel.favoriteDevices) { item in
-                FavoriteDeviceRow(item: item)
+                FavoriteDeviceRow(item: item) { item in
+                    viewModel.handleDeviceTap(item)
+                }
                 .swipeActions {
                     Button() {
-                        print("Delete")
+                        viewModel.handleDeviceDelete(item)
                     } label: {
                         Label("Delete", systemImage: "trash.fill")
                     }
@@ -60,9 +64,16 @@ struct FavoriteDevicesView<ScanDevicesView: View>: View {
     }
 
     private var emptyState: some View {
-        Text("No favorite devices yet.")
-            .foregroundColor(.secondary)
-            .frame(maxWidth: .infinity, alignment: .center)
+        ContentUnavailableView {
+            Label("No favorite devices yet", systemImage: "star")
+        } description: {
+            Text("Why don't you add some?")
+        } actions: {
+            NavigationLink(destination: LazyNavigationView(scanDevicesViewProvider())) {
+                Text("Add New Devices")
+            }
+            .buttonStyle(.borderedProminent)
+        }
     }
 
     private var loadingIndicator: some View {
@@ -77,9 +88,7 @@ struct FavoriteDevicesView<ScanDevicesView: View>: View {
                 .foregroundColor(.red)
                 .padding()
             Button("Retry") {
-                Task {
-                    await viewModel.start()
-                }
+                viewModel.start()
             }
             .padding()
         }
@@ -87,14 +96,20 @@ struct FavoriteDevicesView<ScanDevicesView: View>: View {
     }
 
     private var bottomFooter: some View {
-        NavigationLink(destination: LazyNavigationView(scanDevicesViewProvider())) {
-            Text("Add New Devices")
-                .background(Color.blue)
-                .foregroundColor(.white)
-                .frame(maxWidth: .infinity)
-                .padding(.top, 8)
-                .padding(.bottom, 16)
+        VStack {
+            NavigationLink(destination: LazyNavigationView(scanDevicesViewProvider())) {
+                Text("Add New Devices")
+                    .frame(maxWidth: .infinity)
+            }
+            .buttonStyle(.borderedProminent)
+            .tint(.accentColor)
+            .controlSize(.large)
         }
+        .padding()
+        .background(
+            Color(uiColor: .systemGroupedBackground)
+                .ignoresSafeArea(edges: .bottom)
+        )
     }
 }
 
@@ -106,6 +121,7 @@ struct FavoriteDevicesView<ScanDevicesView: View>: View {
 }
 
 final class MockFavoriteDevicesUseCase: FavoriteDevicesUseCaseType {
+
     func favoriteDevices() -> AsyncStream<[Favorite]> {
         AsyncStream { continuation in
             let items = [
@@ -114,5 +130,17 @@ final class MockFavoriteDevicesUseCase: FavoriteDevicesUseCaseType {
             ]
             continuation.yield(items)
         }
+    }
+
+    func addFavorite(deviceId: UUID, lastKnownName: String?, nickname: String?) async {
+
+    }
+
+    func removeFavorite(deviceId: UUID) async {
+
+    }
+
+    func setNickname(deviceId: UUID, nickname: String?) async {
+        
     }
 }

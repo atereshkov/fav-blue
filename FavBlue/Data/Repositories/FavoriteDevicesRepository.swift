@@ -5,6 +5,8 @@ final actor FavoriteDevicesRepository: FavoriteDevicesRepositoryType {
     private var storage: [UUID: Favorite] = [:]
     private var continuations: [UUID: AsyncStream<[Favorite]>.Continuation] = [:]
 
+    // MARK: - Lifecycle
+
     init() {
 //        storage[UUID()] = Favorite(deviceId: UUID(), lastKnownName: "123", nickname: "Nickname")
     }

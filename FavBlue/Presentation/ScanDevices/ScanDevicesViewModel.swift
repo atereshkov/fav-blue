@@ -5,7 +5,7 @@ import Foundation
 final class ScanDevicesViewModel {
 
     private let useCase: BluetoothScannerUseCaseType
-    private let favoritesUseCase: FavoritesManagementUseCaseType
+    private let favoritesUseCase: FavoriteDevicesUseCaseType
 
     private(set) var devices: [BluetoothDevice] = []
     private(set) var state: ScanDevicesState = .scanning
@@ -18,7 +18,7 @@ final class ScanDevicesViewModel {
 
     init(
         useCase: BluetoothScannerUseCaseType,
-        favoritesUseCase: FavoritesManagementUseCaseType
+        favoritesUseCase: FavoriteDevicesUseCaseType
     ) {
         self.useCase = useCase
         self.favoritesUseCase = favoritesUseCase
@@ -35,7 +35,7 @@ final class ScanDevicesViewModel {
 
         devicesTask = Task { [weak self] in
             guard let self = self else { return }
-            for await list in useCase.devices() {
+            for await list in useCase.devicesStream() {
                 self.devices = list
 //                    .map { FavoriteDeviceViewItem(name: $0.name ?? "") }
             }
@@ -43,7 +43,7 @@ final class ScanDevicesViewModel {
 
         stateTask = Task { [weak self] in
             guard let self = self else { return }
-            for await state in useCase.state() {
+            for await state in useCase.stateStream() {
                 self.state = map(scannerState: state)
             }
         }
@@ -55,7 +55,7 @@ final class ScanDevicesViewModel {
         stateTask?.cancel()
     }
 
-    func handleDeviceTap(device: BluetoothDevice) {
+    func handleDeviceTap(_ device: BluetoothDevice) {
         if device.isFavorite {
             activeDialog = .remove(device: device)
         } else {
@@ -67,9 +67,12 @@ final class ScanDevicesViewModel {
 
     func addFavorite(_ device: BluetoothDevice, nickname: String?) {
         let lastKnownName = device.name
-        // TODO nickname
         Task {
-            await favoritesUseCase.addFavorite(deviceId: device.id, lastKnownName: lastKnownName, nickname: nil)
+            await favoritesUseCase.addFavorite(
+                deviceId: device.id,
+                lastKnownName: lastKnownName,
+                nickname: nickname ?? lastKnownName
+            )
         }
     }
 

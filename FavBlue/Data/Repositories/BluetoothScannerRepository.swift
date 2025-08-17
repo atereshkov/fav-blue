@@ -26,18 +26,18 @@ final class BluetoothScannerRepository: BluetoothScannerRepositoryType {
 
     // MARK: - Internal methods
 
-    func devices() -> AsyncStream<[BluetoothDevice]> {
+    func devicesStream() -> AsyncStream<[BluetoothDevice]> {
         AsyncStream { continuation in
             self.devicesContinuation = continuation
             // TODO: Move out sorting to usecase lvl?
-            continuation.yield(Array(self.devicesById.values).sorted(by: { $0.name ?? "" > $1.name ?? "" }))
+            continuation.yield(Array(self.devicesById.values).sorted(by: { $0.id > $1.id }))
             continuation.onTermination = { _ in
                 self.devicesContinuation = nil
             }
         }
     }
 
-    func state() -> AsyncStream<BluetoothScanState> {
+    func stateStream() -> AsyncStream<BluetoothScanState> {
         AsyncStream { continuation in
             self.stateContinuation = continuation
             continuation.yield(.idle)
@@ -77,7 +77,7 @@ final class BluetoothScannerRepository: BluetoothScannerRepositoryType {
                     }
                     // TODO: Remove sorting?
                     let sorted = Array(self.devicesById.values)
-                        .sorted { ($0.name ?? "") > ($1.name ?? "") }
+                        .sorted { $0.id > $1.id }
                     self.devicesContinuation?.yield(sorted)
                 }
             }

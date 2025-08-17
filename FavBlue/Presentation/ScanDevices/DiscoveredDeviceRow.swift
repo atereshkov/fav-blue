@@ -1,6 +1,7 @@
 import SwiftUI
 
 struct DiscoveredDeviceRow: View {
+    // TODO: use RowViewModel
     let item: BluetoothDevice
     let onTap: (BluetoothDevice) -> Void
 
@@ -9,9 +10,16 @@ struct DiscoveredDeviceRow: View {
             onTap(item)
         }) {
             HStack {
-                Text(item.name ?? "Unknown")
-                Text(String(item.rssi))
+                VStack(alignment: .leading) {
+                    Text(item.nickname ?? item.name ?? "Unknown")
+                        .font(.headline)
+                    Text(item.id.uuidString)
+                        .font(.footnote)
+                        .fontWeight(.regular)
+                        .fontDesign(.monospaced)
+                }
                 Spacer()
+                Text(String(item.rssi))
                 Image(systemName: item.isFavorite ? "star.fill" : "star")
             }
         }

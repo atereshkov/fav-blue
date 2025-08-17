@@ -1,0 +1,63 @@
+{
+  "sourceLanguage" : "en",
+  "strings" : {
+    "Add" : {
+
+    },
+    "Add New Devices" : {
+      "extractionState" : "manual"
+    },
+    "Alert Title" : {
+
+    },
+    "An error occurred while loading devices." : {
+
+    },
+    "Cancel" : {
+
+    },
+    "Delete" : {
+
+    },
+    "Discovered Devices" : {
+
+    },
+    "Enter device nickname (optional)" : {
+
+    },
+    "Favorites" : {
+
+    },
+    "Nickname" : {
+
+    },
+    "No favorite devices yet" : {
+
+    },
+    "Remove" : {
+
+    },
+    "Remove %@ from favorites?" : {
+
+    },
+    "Retry" : {
+
+    },
+    "Scan Devices" : {
+
+    },
+    "Scanning..." : {
+
+    },
+    "Submit" : {
+
+    },
+    "Warming up..." : {
+
+    },
+    "Why don't you add some?" : {
+
+    }
+  },
+  "version" : "1.0"
+}

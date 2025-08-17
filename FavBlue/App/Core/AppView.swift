@@ -18,7 +18,7 @@ struct AppView: View {
                 splashView
             }
         }
-        .animation(.easeInOut(duration: 0.45), value: splashViewModel.isFinished)
+        .animation(.easeInOut(duration: AnimationDuration.medium), value: splashViewModel.isFinished)
     }
 
     var favoritesView: some View {
@@ -27,7 +27,7 @@ struct AppView: View {
             scanDevicesViewProvider: { scanDevicesView }
         )
         .opacity(splashViewModel.isFinished ? 1 : 0)
-        .animation(.easeInOut(duration: 0.45), value: splashViewModel.isFinished)
+        .animation(.easeInOut(duration: AnimationDuration.medium), value: splashViewModel.isFinished)
     }
 
     var splashView: some View {

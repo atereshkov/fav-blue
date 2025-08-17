@@ -15,16 +15,16 @@ struct SplashView: View {
                 Spacer()
                 Text(viewModel.name)
                     .multilineTextAlignment(.center)
-                    .font(.system(size: 42, weight: .bold, design: .rounded))
+                    .font(.system(size: 42, weight: .bold))
                     .scaleEffect(animate ? 0.8 : 1.0)
                     .opacity(animate ? 1.0 : 0.0)
-                    .animation(.easeOut(duration: 0.45), value: animate)
+                    .animation(.easeOut(duration: AnimationDuration.medium), value: animate)
                 Spacer()
             }
         }
         .onAppear {
             viewModel.start()
-            withAnimation(.easeOut(duration: 0.6)) { animate = true }
+            withAnimation(.easeOut(duration: AnimationDuration.long)) { animate = true }
         }
         .onDisappear {
             viewModel.cancel()

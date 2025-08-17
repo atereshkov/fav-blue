@@ -1,8 +1,8 @@
 import Foundation
 
 protocol BluetoothScannerRepositoryType {
-    func devices() -> AsyncStream<[BluetoothDevice]>
-    func state() -> AsyncStream<BluetoothScanState>
+    func devicesStream() -> AsyncStream<[BluetoothDevice]>
+    func stateStream() -> AsyncStream<BluetoothScanState>
 
     func startScanning()
     func stopScanning()

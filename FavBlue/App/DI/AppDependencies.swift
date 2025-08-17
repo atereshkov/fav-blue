@@ -20,11 +20,8 @@ final class AppDependencies {
 
     @MainActor func makeScanDevicesViewModel() -> ScanDevicesViewModel {
         ScanDevicesViewModel(
-            useCase: BluetoothScannerUseCase(
-                repository: BluetoothScannerRepository(bluetoothScanner: BluetoothScanner()),
-                favoritesRepository: favoriteRepository
-            ),
-            favoritesUseCase: makeFavoritesManagementUseCase()
+            useCase: makeBluetoothScannerUseCase(),
+            favoritesUseCase: makeFavoriteDevicesUseCase()
         )
     }
 
@@ -34,7 +31,10 @@ final class AppDependencies {
         FavoriteDevicesUseCase(repository: favoriteRepository)
     }
 
-    private func makeFavoritesManagementUseCase() -> FavoritesManagementUseCase {
-        FavoritesManagementUseCase(repository: favoriteRepository)
+    private func makeBluetoothScannerUseCase() -> BluetoothScannerUseCase {
+        BluetoothScannerUseCase(
+            repository: BluetoothScannerRepository(bluetoothScanner: BluetoothScanner()),
+            favoritesRepository: favoriteRepository
+        )
     }
 }
