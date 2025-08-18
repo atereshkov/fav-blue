@@ -3,7 +3,7 @@
 **Pattern:** MVVM with Clean Architecture principles.
 
 **Layers & responsibilities:**
-- **Domain**: Entities (BluetoothDevice / Favorite), repository interfaces.
+- **Domain**: Entities (BluetoothDevice / Favorite), use cases and repository interfaces.
 - **Data**: Bluetooth scanner implementation; Favorites persistence adapter (currently in-memory).
 - **Presentation**: SwiftUI Views + ViewModels (one ViewModel per screen / feature).
 - **Composition Root**: Wires implementations to interfaces (single place for DI).
