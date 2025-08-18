@@ -63,7 +63,7 @@
   - "Add New Devices" button to Scanner screen.
 3. Scanner screen:
 - Auto-start scanning, asks for Bluetooth permission if needed.
-- Shows Name / Identifier / RSSI when available.
+- Shows Name / Identifier / RSSI when available. Items are sorted.
 - Favorited devices visually distinct and with a heart icon.
 - Tap on favorited device → prompt to remove; tap on new device → prompt to add (with optional nickname).
 4. System Launch screen that matches splash for smooth transition.
