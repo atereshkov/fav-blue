@@ -8,6 +8,10 @@
 - **Presentation**: SwiftUI Views + ViewModels (one ViewModel per screen / feature).
 - **Composition Root**: Wires implementations to interfaces (single place for DI).
 
+**Modularization:**
+- Code is organised for easy extraction to SPM modules — features are decoupled behind protocols and wired via a Composition Root.
+- `Scanner` / `Favorites` and Domain/Data/Presentation layers can be split into independent packages with minimal changes.
+
 **Why this setup:**
 - Modern stack for new iOS Apps.
 - MVVM fits SwiftUI naturally (state binding - ViewModel).
