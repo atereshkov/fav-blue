@@ -9,8 +9,8 @@ final class ScanDevicesViewModel {
 
     private(set) var devices: [BluetoothDevice] = []
     private(set) var state: ScanDevicesState = .scanning
-    private(set) var activeAlert: ScanDeviceAlert?
-    private(set) var activeSheet: ScanDeviceSheet?
+    private(set) var activeAlert: ScanDevicesAlert?
+    private(set) var activeSheet: ScanDevicesSheet?
 
     private var devicesTask: Task<Void, Never>?
     private var stateTask: Task<Void, Never>?

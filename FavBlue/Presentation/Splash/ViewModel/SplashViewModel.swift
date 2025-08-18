@@ -15,7 +15,7 @@ final class SplashViewModel {
 
     // MARK: - Internal
 
-    func start(timeoutSeconds: TimeInterval = 1) {
+    func start(timeoutSeconds: TimeInterval = 2) {
         guard timerTask == nil else { return }
 
         timerTask = Task {

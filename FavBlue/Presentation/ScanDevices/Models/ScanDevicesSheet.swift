@@ -1,6 +1,6 @@
 import Foundation
 
-enum ScanDeviceSheet: Identifiable, Equatable {
+enum ScanDevicesSheet: Identifiable, Equatable {
     case addToFavorites(device: BluetoothDevice)
 
     var id: String {

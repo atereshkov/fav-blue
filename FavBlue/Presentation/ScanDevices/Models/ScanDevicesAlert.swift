@@ -1,6 +1,6 @@
 import Foundation
 
-enum ScanDeviceAlert: Equatable {
+enum ScanDevicesAlert: Equatable {
     case remove(device: BluetoothDevice)
 
     var message: String {
