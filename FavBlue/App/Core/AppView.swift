@@ -5,10 +5,14 @@ struct AppView: View {
 
     let dependencies: AppDependencies
 
+    // MARK: - Lifecycle
+
     init(dependencies: AppDependencies) {
         self.dependencies = dependencies
         _splashViewModel = State(wrappedValue: dependencies.makeSplashViewModel())
     }
+
+    // MARK: - Views
 
     var body: some View {
         ZStack {

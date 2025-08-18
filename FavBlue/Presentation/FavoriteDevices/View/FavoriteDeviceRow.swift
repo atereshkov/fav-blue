@@ -9,7 +9,7 @@ struct FavoriteDeviceRow: View {
             onTap(item)
         }) {
             VStack(alignment: .leading) {
-                Text(item.nickname ?? item.lastKnownName ?? "Unknown")
+                Text(item.userFacingName)
                     .font(.headline)
                 Text(item.deviceId.uuidString)
                     .font(.footnote)

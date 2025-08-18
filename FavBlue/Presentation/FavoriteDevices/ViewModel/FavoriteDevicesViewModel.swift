@@ -8,7 +8,7 @@ final class FavoriteDevicesViewModel {
 
     private(set) var favoriteDevices: [Favorite] = []
     private(set) var state: FavoriteDevicesState = .loading
-    private(set) var activeDialog: FavoriteDevicesDialog?
+    private(set) var activeAlert: FavoriteDevicesAlert?
     private(set) var activeSheet: FavoriteDevicesSheet?
 
     private var favoritesTask: Task<Void, Never>?
@@ -17,10 +17,6 @@ final class FavoriteDevicesViewModel {
 
     init(useCase: FavoriteDevicesUseCaseType) {
         self.useCase = useCase
-    }
-
-    deinit {
-        print("FavoriteDevicesViewModel deinit")
     }
 
     // MARK: - Internal methods
@@ -34,7 +30,6 @@ final class FavoriteDevicesViewModel {
                 let stream = await useCase.favoriteDevices()
                 for try await list in stream {
                     self.favoriteDevices = list
-//                        .map { FavoriteDeviceViewItem(name: $0.name ?? "") }
                     self.state = list.isEmpty ? .empty : .loaded
                 }
             } catch {
@@ -53,7 +48,7 @@ final class FavoriteDevicesViewModel {
     }
 
     func deleteFavoriteRequested(_ device: Favorite) {
-        activeDialog = .remove(device: device)
+        activeAlert = .remove(device: device)
     }
 
     func deleteFavoriteConfirmed(_ device: Favorite) {
@@ -76,8 +71,8 @@ final class FavoriteDevicesViewModel {
 
     // MARK: - Private methods
 
-    func dismissDialog() {
-        activeDialog = nil
+    func dismissAlert() {
+        activeAlert = nil
     }
 
     func dismissSheet() {

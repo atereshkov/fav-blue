@@ -9,7 +9,7 @@ final class ScanDevicesViewModel {
 
     private(set) var devices: [BluetoothDevice] = []
     private(set) var state: ScanDevicesState = .scanning
-    private(set) var activeDialog: ScanDeviceDialog?
+    private(set) var activeAlert: ScanDeviceAlert?
     private(set) var activeSheet: ScanDeviceSheet?
 
     private var devicesTask: Task<Void, Never>?
@@ -25,10 +25,6 @@ final class ScanDevicesViewModel {
         self.favoritesUseCase = favoritesUseCase
     }
 
-    deinit {
-        print("ScanDevicesViewModel deinit")
-    }
-
     // MARK: - Internal methods
 
     func start() {
@@ -38,7 +34,6 @@ final class ScanDevicesViewModel {
             guard let self else { return }
             for await list in useCase.devicesStream(sortedBy: .byNameThenRssi) {
                 self.devices = list
-//                    .map { FavoriteDeviceViewItem(name: $0.name ?? "") }
             }
         }
 
@@ -58,7 +53,7 @@ final class ScanDevicesViewModel {
 
     func handleDeviceTap(_ device: BluetoothDevice) {
         if device.isFavorite {
-            activeDialog = .remove(device: device)
+            activeAlert = .remove(device: device)
         } else {
             activeSheet = .addToFavorites(device: device)
         }
@@ -82,8 +77,8 @@ final class ScanDevicesViewModel {
         }
     }
 
-    func dismissDialog() {
-        activeDialog = nil
+    func dismissAlert() {
+        activeAlert = nil
     }
 
     func dismissSheet() {

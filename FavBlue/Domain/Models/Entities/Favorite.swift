@@ -7,6 +7,10 @@ struct Favorite: Equatable, Identifiable {
     var lastKnownName: String?
     var nickname: String?
 
+    var userFacingName: String {
+        nickname ?? lastKnownName ?? "Unknown"
+    }
+
     init(deviceId: UUID, lastKnownName: String?, nickname: String?) {
         self.deviceId = deviceId
         self.lastKnownName = lastKnownName

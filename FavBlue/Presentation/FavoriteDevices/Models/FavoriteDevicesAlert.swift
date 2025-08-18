@@ -1,16 +1,16 @@
 import Foundation
 
-enum FavoriteDevicesDialog: Equatable {
+enum FavoriteDevicesAlert: Equatable {
     case remove(device: Favorite)
 
     var message: String {
         switch self {
         case .remove(let favorite):
-            "Remove \(favorite.nickname ?? favorite.lastKnownName ?? "") from favorites?"
+            "Remove \(favorite.userFacingName) from favorites?"
         }
     }
 
-    var alertTitle: String {
+    var title: String {
         switch self {
         case .remove(_):
             "Confirm"

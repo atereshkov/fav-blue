@@ -21,7 +21,7 @@ final class BluetoothScanner: NSObject, BluetoothScannerType {
     }
 
     deinit {
-        print("BluetoothScanner deinit")
+        continuation?.finish()
     }
 
     // MARK: - Internal methods
@@ -84,6 +84,7 @@ extension BluetoothScanner: CBCentralManagerDelegate {
     func centralManager(_ central: CBCentralManager, didDiscover peripheral: CBPeripheral, advertisementData: [String : Any], rssi RSSI: NSNumber) {
         let id = peripheral.identifier
         let name = peripheral.name
-        continuation?.yield(.discovered(id: id, name: name, rssi: RSSI.intValue))
+        let rssi = RSSI.intValue
+        continuation?.yield(.discovered(id: id, name: name, rssi: rssi))
     }
 }

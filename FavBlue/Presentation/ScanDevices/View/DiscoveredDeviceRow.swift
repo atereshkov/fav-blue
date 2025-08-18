@@ -10,8 +10,9 @@ struct DiscoveredDeviceRow: View {
         }) {
             HStack {
                 VStack(alignment: .leading) {
-                    Text(item.nickname ?? item.name ?? "Unknown")
+                    Text(item.userFacingName)
                         .font(.headline)
+                        .fontWeight(item.isFavorite ? .semibold : .regular)
                     Text(item.id.uuidString)
                         .font(.footnote)
                         .fontWeight(.regular)
@@ -22,6 +23,11 @@ struct DiscoveredDeviceRow: View {
                 Image(systemName: item.isFavorite ? "star.fill" : "star")
             }
         }
+        .listRowBackground(
+            item.isFavorite
+                ? Color(.gray.withAlphaComponent(0.2))
+                : Color(.systemBackground)
+        )
     }
 }
 

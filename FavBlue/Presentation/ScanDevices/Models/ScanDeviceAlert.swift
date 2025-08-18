@@ -1,16 +1,16 @@
 import Foundation
 
-enum ScanDeviceDialog: Equatable {
+enum ScanDeviceAlert: Equatable {
     case remove(device: BluetoothDevice)
 
     var message: String {
         switch self {
         case .remove(let device):
-            "Remove \(device.nickname ?? device.name ?? "") from favorites?"
+            "Remove \(device.userFacingName) from favorites?"
         }
     }
 
-    var alertTitle: String {
+    var title: String {
         switch self {
         case .remove(_):
             "Confirm"

@@ -7,10 +7,6 @@ final actor FavoriteDevicesRepository: FavoriteDevicesRepositoryType {
 
     // MARK: - Lifecycle
 
-    init() {
-//        storage[UUID()] = Favorite(deviceId: UUID(), lastKnownName: "123", nickname: "Nickname")
-    }
-
     deinit {
         for cont in continuations.values { cont.finish() }
     }
@@ -29,6 +25,7 @@ final actor FavoriteDevicesRepository: FavoriteDevicesRepositoryType {
     }
 
     func addFavorite(deviceId: UUID, lastKnownName: String?, nickname: String?) {
+        let nickname = normalizedNickname(nickname)
         let fav = Favorite(deviceId: deviceId, lastKnownName: lastKnownName, nickname: nickname)
         storage[deviceId] = fav
         broadcastCurrent()
@@ -41,7 +38,7 @@ final actor FavoriteDevicesRepository: FavoriteDevicesRepositoryType {
 
     func setNickname(deviceId: UUID, nickname: String?) {
         guard var existing = storage[deviceId] else { return }
-        existing.nickname = nickname
+        existing.nickname = normalizedNickname(nickname)
         storage[deviceId] = existing
         broadcastCurrent()
     }
@@ -62,5 +59,10 @@ final actor FavoriteDevicesRepository: FavoriteDevicesRepositoryType {
     private func broadcastCurrent() {
         let snapshot = Array(storage.values)
         for cont in continuations.values { cont.yield(snapshot) }
+    }
+
+    private func normalizedNickname(_ nickname: String?) -> String? {
+        let trimmed = nickname?.trim()
+        return (trimmed?.isEmpty ?? true) ? nil : trimmed
     }
 }

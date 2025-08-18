@@ -8,6 +8,10 @@ struct BluetoothDevice: Identifiable, Hashable {
     var nickname: String?
     var isFavorite: Bool = false
 
+    var userFacingName: String {
+        nickname ?? name ?? "Unknown"
+    }
+
     init(id: UUID, name: String?, rssi: Int) {
         self.id = id
         self.name = name

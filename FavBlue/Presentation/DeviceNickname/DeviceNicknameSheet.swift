@@ -24,7 +24,7 @@ struct DeviceNicknameSheet: View {
             Form {
                 Section {
                     TextField("Nickname", text: $nickname)
-                    Text("Editing nickname for this favorite.")
+                    Text("Editing nickname for \(favorite.lastKnownName ?? favorite.nickname ?? "this favorite").")
                         .font(.caption)
                         .foregroundColor(.secondary)
                 }

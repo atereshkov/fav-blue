@@ -33,10 +33,10 @@ struct ScanDevicesView: View {
         .sheet(isPresented: isShowingSheetBinding) {
             sheetView()
         }
-        .alert(viewModel.activeDialog?.alertTitle ?? "", isPresented: isShowingDialogBinding) {
+        .alert(viewModel.activeAlert?.title ?? "", isPresented: isShowingAlertBinding) {
             alertView()
         } message: {
-            Text(viewModel.activeDialog?.message ?? "")
+            Text(viewModel.activeAlert?.message ?? "")
         }
     }
 
@@ -61,13 +61,13 @@ struct ScanDevicesView: View {
 
     @ViewBuilder
     private func alertView() -> some View {
-        switch viewModel.activeDialog {
+        switch viewModel.activeAlert {
         case .remove(let device):
             Button("Remove", role: .destructive) {
                 viewModel.removeFavorite(device: device)
             }
             Button("Cancel", role: .cancel) {
-                viewModel.dismissDialog()
+                viewModel.dismissAlert()
             }
         case .none:
             EmptyView()
@@ -112,11 +112,11 @@ struct ScanDevicesView: View {
         .frame(maxWidth: .infinity, alignment: .center)
     }
 
-    private var isShowingDialogBinding: Binding<Bool> {
+    private var isShowingAlertBinding: Binding<Bool> {
         Binding<Bool>(
-            get: { viewModel.activeDialog != nil },
+            get: { viewModel.activeAlert != nil },
             set: { show in
-                if !show { viewModel.dismissDialog() }
+                if !show { viewModel.dismissAlert() }
             }
         )
     }
