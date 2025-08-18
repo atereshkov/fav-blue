@@ -59,8 +59,6 @@ final class ScanDevicesViewModel {
         }
     }
 
-    // MARK: - Private methods
-
     func addFavorite(_ device: BluetoothDevice, nickname: String?) {
         Task {
             await favoritesUseCase.addFavorite(

@@ -69,8 +69,6 @@ final class FavoriteDevicesViewModel {
         }
     }
 
-    // MARK: - Private methods
-
     func dismissAlert() {
         activeAlert = nil
     }
